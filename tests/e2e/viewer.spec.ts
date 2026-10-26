@@ -46,3 +46,35 @@ test('dragging the canvas rotates the view (camera position changes)', async ({ 
 
   expect(after).not.toEqual(before)
 })
+
+test('switching objects via the panel keeps the canvas healthy', async ({ page }) => {
+  const errors: string[] = []
+  page.on('console', (msg) => {
+    if (msg.type() === 'error') errors.push(msg.text())
+  })
+  page.on('pageerror', (err) => errors.push(err.message))
+
+  await page.goto('/')
+
+  const canvas = page.locator('canvas')
+  await expect(canvas).toBeVisible()
+
+  await page.waitForFunction(() => Boolean(window.__viewerDebug))
+  await expect
+    .poll(() => page.evaluate(() => window.__viewerDebug!.modelId))
+    .toBe('torus-knot')
+
+  await page.getByRole('button', { name: 'House' }).click()
+  await expect(page.getByRole('button', { name: 'House' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(canvas).toBeVisible()
+  await expect
+    .poll(() => page.evaluate(() => window.__viewerDebug!.modelId))
+    .toBe('house')
+
+  const hasWebGL = await canvas.evaluate((el) => {
+    const c = el as HTMLCanvasElement
+    return Boolean(c.getContext('webgl2') ?? c.getContext('webgl'))
+  })
+  expect(hasWebGL).toBe(true)
+  expect(errors).toEqual([])
+})

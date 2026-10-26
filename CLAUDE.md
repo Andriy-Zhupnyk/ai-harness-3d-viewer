@@ -8,9 +8,9 @@ validated. Treat it as binding unless the user explicitly overrides a rule.
 
 A minimal, interactive 3D object viewer (Vite + React + TypeScript + three.js via
 `@react-three/fiber`/`@react-three/drei`). Users drag to rotate and scroll to zoom
-a torus-knot mesh. The application itself is intentionally small — the primary
-deliverable being evaluated is **this harness**: how agents plan, implement, and
-validate changes autonomously.
+a 3D object, picked from a small panel. The application itself is intentionally
+small — the primary deliverable being evaluated is **this harness**: how agents
+plan, implement, and validate changes autonomously.
 
 ## Stack & structure
 
@@ -24,16 +24,25 @@ validate changes autonomously.
 
 ```
 src/
+  models/
+    index.ts              MODELS registry (id/label/Component) — single source
+                           of truth for Scene and ObjectPicker
+    TorusKnot.tsx          3D mesh, uses useIdleSpin
+    House.tsx              3D mesh, uses useIdleSpin
+    useIdleSpin.ts         shared idle-rotation hook (mesh/group ref)
   components/
-    Scene.tsx            <Canvas> + lighting + OrbitControls
-    RotatingObject.tsx   the 3D mesh + idle spin
-    InfoOverlay.tsx       UI text overlay (unit-testable, no WebGL)
-    ViewerDebugBridge.tsx exposes window.__viewerDebug for e2e assertions
-  App.tsx
+    Scene.tsx              <Canvas> + lighting + OrbitControls + active model
+    ObjectPicker.tsx       UI panel to switch models (unit-testable, no WebGL)
+    InfoOverlay.tsx        UI text overlay (unit-testable, no WebGL)
+    ViewerDebugBridge.tsx  exposes window.__viewerDebug for e2e assertions
+  App.tsx                  owns the selected ModelId state
 tests/
   unit/        Vitest + RTL (non-WebGL components/logic only)
   e2e/         Playwright (real browser, real WebGL canvas)
 ```
+
+Adding another object means adding one file under `src/models/` and one entry
+in `src/models/index.ts` — `Scene`/`ObjectPicker` need no changes.
 
 ## Agent roles (how work happens here)
 
