@@ -1,5 +1,7 @@
 # AI Harness 3D Viewer
 
+**Live demo: https://andriy-zhupnyk.github.io/ai-harness-3d-viewer/**
+
 A minimal, interactive 3D object viewer — drag to rotate, scroll to zoom — built
 with Vite, React, TypeScript, and three.js (`@react-three/fiber` / `@react-three/drei`).
 
